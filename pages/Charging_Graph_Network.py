@@ -20,7 +20,7 @@ pos = nx.spring_layout(G)
 
 # Set the positions as node attributes
 nx.set_node_attributes(G, pos, 'pos')
-
+# drawing part
 edge_x = []
 edge_y = []
 for edge in G.edges():
@@ -67,6 +67,13 @@ node_trace = go.Scatter(
             titleside='right'
         ),
         line_width=2))
+# defining shape of nodes
+shape_nodes = []
+for node in list(G.nodes):
+    if node.startswith("ST"):
+        shape_nodes.append("diamond")
+    if node.startswith("EV"):
+        shape_nodes.append("circle")
 
 node_adjacencies = []
 node_text = []
@@ -75,6 +82,7 @@ for adjacencies,node in zip(G.adjacency(),G.nodes()):
     node_text.append(f'{node}: '+str(len(adjacencies[1])))
 
 node_trace.marker.color = node_adjacencies
+node_trace.marker.symbol = shape_nodes
 node_trace.text = node_text
 
 fig = go.Figure(data=[edge_trace, node_trace],
