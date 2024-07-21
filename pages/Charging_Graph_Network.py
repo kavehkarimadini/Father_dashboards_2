@@ -14,8 +14,32 @@ raw_data = load_data_yearly()
 raw_data["ChargerID"] = raw_data["ChargerID"].map(lambda x: f"ST{x}")
 raw_data["UserID"] = raw_data["UserID"].map(lambda x: f"EV{x}")
 
-G = nx.from_pandas_edgelist(raw_data, "UserID", 'ChargerID', ['Location', 'Duration'])
+G = nx.from_pandas_edgelist(raw_data, "UserID", 'ChargerID', ['Demand', 'Duration'])
+loc_dict = {}
+for charger_id,loc in zip(raw_data["ChargerID"],raw_data["Location"]):
+    loc_dict[charger_id] = loc
+# Set the locations as node attributes
+nx.set_node_attributes(G, loc_dict, 'location')
 
+charg_company_dict = {}
+for charger_id,chc in zip(raw_data["ChargerID"],raw_data["ChargerCompany"]):
+    charg_company_dict[charger_id] = chc
+# Set the charging company as node attributes
+nx.set_node_attributes(G, charg_company_dict, 'charging_company')
+
+ChargerType_dict = {}
+for charger_id,ct in zip(raw_data["ChargerID"],raw_data["ChargerType"]):
+    ChargerType_dict[charger_id] = ct
+# Set the charging type as node attributes
+nx.set_node_attributes(G, ChargerType_dict, 'charger_type')
+
+number_of_conections = {}
+for adjacencies,node in zip(G.adjacency(),G.nodes()):
+    number_of_conections[node] = len(adjacencies[1])
+# Set the number of connections as node attributes
+nx.set_node_attributes(G, number_of_conections, 'number_of_connections')
+
+node_attributes = list(G.nodes(data=True))
 pos = nx.spring_layout(G)
 
 # Set the positions as node attributes
@@ -83,14 +107,14 @@ for adjacencies,node in zip(G.adjacency(),G.nodes()):
 
 node_trace.marker.color = node_adjacencies
 node_trace.marker.symbol = shape_nodes
-node_trace.text = node_text
+node_trace.text = node_attributes
 
 fig = go.Figure(data=[edge_trace, node_trace],
              layout=go.Layout(
                 title='<br>Network graph made with Python',
                 titlefont_size=16,
                 showlegend=False,
-                hovermode='closest',
+                hovermode='x',
                 margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[ dict(
                     text="Python code: <a href='https://plotly.com/python/network-graphs/'> https://plotly.com/python/network-graphs/</a>",
