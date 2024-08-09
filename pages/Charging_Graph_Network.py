@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
+import copy
 import networkx as nx
 import plotly.graph_objects as go
+import plotly.express as px
 def load_data_yearly():
     penguin_file = st.file_uploader("Select Your Local CSV file")
     if penguin_file is None:
@@ -39,7 +41,7 @@ for adjacencies,node in zip(G.adjacency(),G.nodes()):
 # Set the number of connections as node attributes
 nx.set_node_attributes(G, number_of_conections, 'number_of_connections')
 
-node_attributes = list(G.nodes(data=True))
+node_attributes = copy.deepcopy(list(G.nodes(data=True)))
 pos = nx.spring_layout(G)
 
 # Set the positions as node attributes
@@ -114,10 +116,10 @@ fig = go.Figure(data=[edge_trace, node_trace],
                 title='<br>Network graph made with Python',
                 titlefont_size=16,
                 showlegend=False,
-                hovermode='x',
+                hovermode='closest',
                 margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[ dict(
-                    text="Python code: <a href='https://plotly.com/python/network-graphs/'> https://plotly.com/python/network-graphs/</a>",
+                    # text="Python code: <a href='https://plotly.com/python/network-graphs/'> https://plotly.com/python/network-graphs/</a>",
                     showarrow=False,
                     xref="paper", yref="paper",
                     x=0.005, y=-0.002 ) ],
@@ -126,3 +128,25 @@ fig = go.Figure(data=[edge_trace, node_trace],
                 )
 
 st.plotly_chart(fig)
+
+# option = st.multiselect(
+#     "What node do you want to analise",
+#     list(G.nodes()),
+#     max_selections=1)
+# if option == []:
+#     st.stop()
+# print(option[0])
+# if option[0].startswith("ST"):
+#     filtered_df = raw_data[raw_data["ChargerID"] == option[0]]
+#     filtered_df["StartDatetime"] = pd.to_datetime(filtered_df["StartDatetime"])
+#     sorted_df = filtered_df.sort_values(by='StartDatetime')
+#     fig2 = px.line(sorted_df, x='StartDatetime', y="Demand")
+#     st.plotly_chart(fig2)
+#     st.header(f"The average demand for {option[0]} is {sorted_df["Demand"].mean()}")
+# if option[0].startswith("EV"):
+#     filtered_df = raw_data[raw_data["UserID"] == option[0]]
+#     filtered_df["StartDatetime"] = pd.to_datetime(filtered_df["StartDatetime"])
+#     sorted_df = filtered_df.sort_values(by='StartDatetime')
+#     fig2 = px.line(sorted_df, x='StartDatetime', y="Demand")
+#     st.plotly_chart(fig2)
+#     st.header(f"The average demand for {option[0]} is {sorted_df["Demand"].mean()}")
